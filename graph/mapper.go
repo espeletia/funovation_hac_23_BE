@@ -14,11 +14,14 @@ func NewMapper() *Mapper {
 
 func (m *Mapper) mapYoutubeVideoToGqlVideo(ytVideo *domain.YoutubeVideo) *model.VideoResponse {
 	return &model.VideoResponse{
-		ID:        strconv.FormatInt(ytVideo.ID, 10),
-		Title:     ytVideo.Title,
-		URL:       ytVideo.S3Path,
-		YouTubeID: ytVideo.YoutubeID,
-		Status:    m.mapStatus(ytVideo.Status),
+		ID:          strconv.FormatInt(ytVideo.ID, 10),
+		Title:       ytVideo.Title,
+		URL:         ytVideo.S3Path,
+		YouTubeID:   ytVideo.YoutubeID,
+		Status:      m.mapStatus(ytVideo.Status),
+		Thumbnail:   ytVideo.Thumbnail,
+		Description: ytVideo.Description,
+		CustomTitle: ytVideo.CustomTitle,
 	}
 }
 

@@ -8,6 +8,7 @@ type Config struct {
 	DBConfig         DBConfig
 	MigrationsConfig MigrationsConfig
 	S3Config         S3Config
+	EncodingConfig   EncodingConfig
 }
 
 func LoadConfig() *Config {
@@ -17,6 +18,7 @@ func LoadConfig() *Config {
 		DBConfig:         loadDbConfig(),
 		MigrationsConfig: loadMigrationsConfig(),
 		S3Config:         loadS3Config(),
+		EncodingConfig:   loadEncodingConfig(),
 	}
 }
 

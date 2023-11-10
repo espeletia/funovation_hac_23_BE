@@ -7,14 +7,13 @@ package graph
 import (
 	"context"
 	"funovation_23/graph/model"
-	"funovation_23/internal/util"
 	"strconv"
 )
 
 // ProcessYoutubeVideo is the resolver for the processYoutubeVideo field.
-func (r *mutationResolver) ProcessYoutubeVideo(ctx context.Context, url string) (*model.VideoResponse, error) {
-	videoID := util.GetYoutubeIDFromURL(url)
-	video, err := r.VideoUsecase.ProcessYoutubeVideo(ctx, videoID)
+func (r *mutationResolver) ProcessYoutubeVideo(ctx context.Context, req model.VideoRequest) (*model.VideoResponse, error) {
+	mappedReq := r.InputMapper.MapCreateVideoInputToDomain(req)
+	video, err := r.VideoUsecase.ProcessYoutubeVideo(ctx, mappedReq)
 	if err != nil {
 		return nil, err
 	}

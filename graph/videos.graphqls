@@ -4,10 +4,19 @@ type VideoResponse {
     title: String!
     youTubeId: String!
     status: String!
+    thumbnail: String!
+    customTitle: String!
+    description: String!
+}
+
+input VideoRequest {
+    url: String!
+    title: String!
+    description: String!
 }
 
 extend type Mutation {
-    processYoutubeVideo(url: String!): VideoResponse!
+    processYoutubeVideo(req: VideoRequest!): VideoResponse!
 }
 
 extend type Query {

@@ -10,17 +10,17 @@ import (
 )
 
 type VideoDownloaderInterface interface {
-	DownloadYTVideo(videoID string) (*domain.DownloadedYTVideo, error)
+	DownloadYTVideo(videoCreate domain.CreateVideo) (*domain.DownloadedYTVideo, error)
 }
 
 type VideoDownloader struct{}
 
 func NewVideoDownloader() *VideoDownloader { return &VideoDownloader{} }
 
-func (YTD *VideoDownloader) DownloadYTVideo(videoID string) (*domain.DownloadedYTVideo, error) {
+func (YTD *VideoDownloader) DownloadYTVideo(videoCreate domain.CreateVideo) (*domain.DownloadedYTVideo, error) {
 	client := youtube.Client{}
 
-	video, err := client.GetVideo(videoID)
+	video, err := client.GetVideo(videoCreate.YoutubeID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +46,14 @@ func (YTD *VideoDownloader) DownloadYTVideo(videoID string) (*domain.DownloadedY
 	if err != nil {
 		return nil, err
 	}
-	pathSplice := filepath.SplitList(path)
-	lastIndex := len(pathSplice) - 1
-	path = pathSplice[lastIndex]
+	// pathSplice := filepath.SplitList(path)
+	// lastIndex := len(pathSplice) - 1
+	// path = pathSplice[lastIndex]
 	return &domain.DownloadedYTVideo{
-		YoutubeID: videoID,
-		LocalPath: path,
-		Title:     video.Title,
+		YoutubeID:   videoCreate.YoutubeID,
+		LocalPath:   path,
+		Title:       video.Title,
+		CustomTitle: videoCreate.CustomTitle,
+		Description: videoCreate.Description,
 	}, nil
 }

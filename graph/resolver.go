@@ -9,5 +9,6 @@ import "funovation_23/internal/usecases"
 type Resolver struct {
 	VideoUsecase *usecases.VideoUsecase
 
-	Mapper *Mapper
+	Mapper      *Mapper
+	InputMapper *InputMapper
 }

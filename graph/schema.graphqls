@@ -2,9 +2,7 @@ type Ack{
     ok: Boolean!
 }
 
-type Query{
-  ok: Ack!
-} 
+type Query
 
 
 type Mutation 

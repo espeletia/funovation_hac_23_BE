@@ -11,7 +11,7 @@ import (
 )
 
 type VideoStoreInterface interface {
-	CreateVideo(ctx context.Context, video *domain.DownloadedYTVideo, path string) (*domain.YoutubeVideo, error)
+	CreateVideo(ctx context.Context, video *domain.DownloadedYTVideo, videoPath, thumbnailPath string) (*domain.YoutubeVideo, error)
 	GetVideo(ctx context.Context, id int64) (*domain.YoutubeVideo, error)
 	GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo, error)
 }
@@ -24,16 +24,22 @@ func NewVideosStore(db *sql.DB) *VideosStore {
 	return &VideosStore{db: db}
 }
 
-func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.DownloadedYTVideo, path string) (*domain.YoutubeVideo, error) {
+func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.DownloadedYTVideo, videoPath, thumbnailPath string) (*domain.YoutubeVideo, error) {
 	inssertModel := model.Videos{
-		YoutubeID: video.YoutubeID,
-		Title:     video.Title,
-		URL:       path,
+		YoutubeID:   video.YoutubeID,
+		Title:       video.Title,
+		URL:         videoPath,
+		Thumbnail:   thumbnailPath,
+		CustomTitle: video.CustomTitle,
+		Description: video.Description,
 	}
 	stmt := table.Videos.INSERT(
 		table.Videos.YoutubeID,
 		table.Videos.Title,
 		table.Videos.URL,
+		table.Videos.CustomTitle,
+		table.Videos.Thumbnail,
+		table.Videos.Description,
 	).
 		MODEL(inssertModel).
 		RETURNING(table.Videos.AllColumns)
@@ -85,10 +91,13 @@ func (vs *VideosStore) GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo
 
 func mapDBVideo(video model.Videos) *domain.YoutubeVideo {
 	return &domain.YoutubeVideo{
-		ID:        int64(video.ID),
-		YoutubeID: video.YoutubeID,
-		Title:     video.Title,
-		S3Path:    video.URL,
-		Status:    int64(video.Status),
+		ID:          int64(video.ID),
+		YoutubeID:   video.YoutubeID,
+		Title:       video.Title,
+		S3Path:      video.URL,
+		Status:      int64(video.Status),
+		Thumbnail:   video.Thumbnail,
+		CustomTitle: video.CustomTitle,
+		Description: video.Description,
 	}
 }
