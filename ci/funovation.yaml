@@ -22,3 +22,5 @@ spec:
       env:
         - name: DATABASE_URL
           value: "postgres://postgres:postgres@postgresql-funovation:5432/funovation?sslmode=disable"
+        - name: S3_URL
+          value: http://minio:9000

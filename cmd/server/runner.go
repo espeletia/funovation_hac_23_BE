@@ -17,6 +17,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
@@ -28,8 +29,15 @@ func Run() error {
 		log.Println("Error while connecting to database")
 		return err
 	}
+	httpClient := http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+	s3Client, err := setup.SetupS3Client(configuration.S3Config, &httpClient)
+	if err != nil {
+		return err
+	}
 	log.Printf("%+v\n", configuration)
-	resolver, err := setup.NewResolver(dbConn, *configuration)
+	resolver, err := setup.NewResolver(dbConn, *configuration, s3Client)
 	if err != nil {
 		return err
 	}

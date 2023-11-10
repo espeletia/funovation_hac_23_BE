@@ -1,0 +1,11 @@
+type VideoResponse {
+    id: ID!
+    url: String!
+    title: String!
+    duration: Int!
+    thumbnail: String!
+}
+
+extend type Mutation {
+    processYoutubeVideo(url: String!): Ack!
+}

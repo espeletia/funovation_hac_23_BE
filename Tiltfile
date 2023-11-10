@@ -1,6 +1,9 @@
 load('ext://restart_process', 'docker_build_with_restart')
 load_dynamic('./ci/tilt/postgres.Tiltfile')
+load_dynamic('./ci/tilt/minio.Tiltfile')
 k8s_yaml("./ci/funovation.yaml")
+
+s3Url = "http://minio:9000"
 
 local_resource(
     'regenerate-funovation',
@@ -68,8 +71,9 @@ docker_build_with_restart('funovation-migrations',
     live_update=[
         sync('./build', '/app'),       # Sync the "build" directory with /app inside the container
         sync('./configurations', '/app/configurations')
-    ]
+    ],
+    build_args={"app": "funovation","s3Url": s3Url}
 )
      
 
-k8s_resource("funovation", port_forwards=["0.0.0.0:8080:8080"], resource_deps=['postgresql'], labels=["BE"])
+k8s_resource("funovation", port_forwards=["0.0.0.0:8080:8080"], resource_deps=['postgresql', 'minio'], labels=["BE"])

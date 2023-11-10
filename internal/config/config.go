@@ -7,6 +7,7 @@ type Config struct {
 	Service          ServiceConfig
 	DBConfig         DBConfig
 	MigrationsConfig MigrationsConfig
+	S3Config         S3Config
 }
 
 func LoadConfig() *Config {
@@ -15,6 +16,7 @@ func LoadConfig() *Config {
 		Service:          loadServiceConfig(),
 		DBConfig:         loadDbConfig(),
 		MigrationsConfig: loadMigrationsConfig(),
+		S3Config:         loadS3Config(),
 	}
 }
 
