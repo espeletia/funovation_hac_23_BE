@@ -33,12 +33,12 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(ctx context.Context, videoID string)
 		return nil, err
 	}
 	path := fmt.Sprintf("s3://%s%s", vu.bucket, dowloadedVideo.LocalPath)
-	err = vu.storage.UploadFile(ctx, dowloadedVideo.LocalPath, path, "image/jpeg")
+	uploadedPath, err := vu.storage.UploadFile(ctx, dowloadedVideo.LocalPath, path, "image/jpeg")
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("File uploaded to %s\n", path)
-	video, err := vu.videoStore.CreateVideo(ctx, dowloadedVideo, path)
+	video, err := vu.videoStore.CreateVideo(ctx, dowloadedVideo, uploadedPath)
 	if err != nil {
 		return nil, err
 	}

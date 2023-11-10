@@ -46,6 +46,9 @@ func (YTD *VideoDownloader) DownloadYTVideo(videoID string) (*domain.DownloadedY
 	if err != nil {
 		return nil, err
 	}
+	pathSplice := filepath.SplitList(path)
+	lastIndex := len(pathSplice) - 1
+	path = pathSplice[lastIndex]
 	return &domain.DownloadedYTVideo{
 		YoutubeID: videoID,
 		LocalPath: path,

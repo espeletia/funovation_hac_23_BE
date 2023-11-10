@@ -18,7 +18,7 @@ import (
 )
 
 type FileStorageInterface interface {
-	UploadFile(ctx context.Context, fileSrc string, dest string, contentType string) error
+	UploadFile(ctx context.Context, fileSrc string, dest string, contentType string) (string, error)
 }
 
 func NewFileS3Storage(s3client *s3.Client) *FileS3Storage {
@@ -33,10 +33,10 @@ type FileS3Storage struct {
 	s3client *s3.Client
 }
 
-func (fs *FileS3Storage) UploadFile(ctx context.Context, fileSrc string, dest string, contentType string) error {
+func (fs *FileS3Storage) UploadFile(ctx context.Context, fileSrc string, dest string, contentType string) (string, error) {
 	u, err := url.Parse(dest)
 	if err != nil {
-		return err
+		return "", err
 	}
 	data, err := os.Open(filepath.Clean(fileSrc))
 	defer func() {
@@ -46,11 +46,11 @@ func (fs *FileS3Storage) UploadFile(ctx context.Context, fileSrc string, dest st
 		}
 	}()
 	if err != nil {
-		return err
+		return "", err
 	}
 	key := strings.TrimPrefix(u.Path, "/")
 	uploader := manager.NewUploader(fs.s3client)
-	_, err = uploader.Upload(ctx, &s3.PutObjectInput{
+	out, err := uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(u.Host),
 		Key:         aws.String(key),
 		Body:        data,
@@ -58,8 +58,8 @@ func (fs *FileS3Storage) UploadFile(ctx context.Context, fileSrc string, dest st
 		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return out.Location, nil
 }
