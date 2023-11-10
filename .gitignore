@@ -1,0 +1,15 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+dev_scripts/
+.dev_scripts
+.gen/
+gen/
+build/
+tilt_modules/
+.helm/
+swagger.yaml
+server.crt
+server.key

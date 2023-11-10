@@ -1,0 +1,40 @@
+name: 'push to production'
+
+on: release
+
+jobs:
+  dagger:
+    services:
+        postgres:
+          image: postgres:13.7-alpine
+          ports:
+            - "5434:5432"
+          env:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: delta-eats
+            POSTGRES_USER: postgres
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.20'
+      
+      - name: Install Dagger CLI
+        run: |
+          cd /usr/local
+          curl -L https://dl.dagger.io/dagger/install.sh | sh
+
+      - name: Get SHA for last commit
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name:  Build and publish with Dagger
+        run: dagger run go run cmd/ci_cd/main.go push production
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          SHORT_SHA: ${{ env.SHORT_SHA }}
