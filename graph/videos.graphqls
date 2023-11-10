@@ -2,10 +2,15 @@ type VideoResponse {
     id: ID!
     url: String!
     title: String!
-    duration: Int!
-    thumbnail: String!
+    youTubeId: String!
+    status: String!
 }
 
 extend type Mutation {
-    processYoutubeVideo(url: String!): Ack!
+    processYoutubeVideo(url: String!): VideoResponse!
+}
+
+extend type Query {
+    getVideo(internalId: ID!): VideoResponse!
+    getVideos: [VideoResponse!]!
 }

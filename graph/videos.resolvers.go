@@ -8,14 +8,41 @@ import (
 	"context"
 	"funovation_23/graph/model"
 	"funovation_23/internal/util"
+	"strconv"
 )
 
 // ProcessYoutubeVideo is the resolver for the processYoutubeVideo field.
-func (r *mutationResolver) ProcessYoutubeVideo(ctx context.Context, url string) (*model.Ack, error) {
+func (r *mutationResolver) ProcessYoutubeVideo(ctx context.Context, url string) (*model.VideoResponse, error) {
 	videoID := util.GetYoutubeIDFromURL(url)
-	err := r.VideoUsecase.ProcessYoutubeVideo(videoID)
+	video, err := r.VideoUsecase.ProcessYoutubeVideo(ctx, videoID)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Ack{Ok: true}, nil
+	return r.Mapper.mapYoutubeVideoToGqlVideo(video), nil
+}
+
+// GetVideo is the resolver for the getVideo field.
+func (r *queryResolver) GetVideo(ctx context.Context, internalID string) (*model.VideoResponse, error) {
+	id, err := strconv.ParseInt(internalID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	video, err := r.VideoUsecase.GetVideo(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r.Mapper.mapYoutubeVideoToGqlVideo(video), nil
+}
+
+// GetVideos is the resolver for the getVideos field.
+func (r *queryResolver) GetVideos(ctx context.Context) ([]*model.VideoResponse, error) {
+	videos, err := r.VideoUsecase.GetAllVideos(ctx)
+	if err != nil {
+		return nil, err
+	}
+	gqlVideos := []*model.VideoResponse{}
+	for _, video := range videos {
+		gqlVideos = append(gqlVideos, r.Mapper.mapYoutubeVideoToGqlVideo(video))
+	}
+	return gqlVideos, nil
 }

@@ -5,7 +5,7 @@ type YoutubeVideo struct {
 	Title     string
 	S3Path    string
 	YoutubeID string
-	LocalPath string
+	Status    int64
 }
 
 type DownloadedYTVideo struct {

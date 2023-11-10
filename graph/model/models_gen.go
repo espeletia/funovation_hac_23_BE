@@ -10,6 +10,6 @@ type VideoResponse struct {
 	ID        string `json:"id"`
 	URL       string `json:"url"`
 	Title     string `json:"title"`
-	Duration  int    `json:"duration"`
-	Thumbnail string `json:"thumbnail"`
+	YouTubeID string `json:"youTubeId"`
+	Status    string `json:"status"`
 }
