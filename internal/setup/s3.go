@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-const defaultUrl = "https://s3.amazonaws.com"
+const defaultUrl = "https://fra1.digitaloceanspaces.com"
 
 func SetupS3Client(config config.S3Config, httpClient *http.Client) (*s3.Client, error) {
 	options := []func(*awsConfig.LoadOptions) error{

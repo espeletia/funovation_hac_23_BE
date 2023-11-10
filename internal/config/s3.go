@@ -23,6 +23,18 @@ func loadS3Config() S3Config {
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+	err = v.BindEnv("AccessKey", "S3_ACCESS_KEY")
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+	err = v.BindEnv("SecretAccessKey", "S3_SECRET_ACCESS_KEY")
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+	err = v.BindEnv("Bucket", "BUCKET")
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
 	err = v.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))

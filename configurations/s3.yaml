@@ -3,5 +3,5 @@ Credentials: configurations/creds
 AccessKey: minio123
 SecretAccessKey: minio123
 UploadsPathPrefix: uploads
-Region: us-east-1
+Region: eu-central-1
 Bucket: test

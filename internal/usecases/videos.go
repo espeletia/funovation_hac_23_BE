@@ -13,12 +13,15 @@ type VideoUsecase struct {
 	videoStore     database.VideoStoreInterface
 	videoDowloader downloader.VideoDownloaderInterface
 	storage        fileStorage.FileStorageInterface
+
+	bucket string
 }
 
-func NewVideoUsecase(videoStore database.VideoStoreInterface, downloader downloader.VideoDownloaderInterface, storage fileStorage.FileStorageInterface) *VideoUsecase {
+func NewVideoUsecase(videoStore database.VideoStoreInterface, downloader downloader.VideoDownloaderInterface, storage fileStorage.FileStorageInterface, bucket string) *VideoUsecase {
 	return &VideoUsecase{
 		videoStore:     videoStore,
 		videoDowloader: downloader,
+		bucket:         bucket,
 		storage:        storage,
 	}
 }
@@ -29,7 +32,7 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(videoID string) error {
 		return err
 	}
 	log.Println("Downloaded video", dowloadedVideo)
-	err = vu.storage.UploadFile(context.Background(), dowloadedVideo.LocalPath, fmt.Sprintf("s3://test/uploads%s", dowloadedVideo.LocalPath), "image/jpeg")
+	err = vu.storage.UploadFile(context.Background(), dowloadedVideo.LocalPath, fmt.Sprintf("s3://%s%s", vu.bucket, dowloadedVideo.LocalPath), "image/jpeg")
 	if err != nil {
 		return err
 	}

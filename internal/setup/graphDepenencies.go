@@ -16,7 +16,7 @@ func NewResolver(dbConn *sql.DB, config config.Config, s3Client *s3.Client) (*gr
 	videoStore := database.NewVideosStore(dbConn)
 	VideoDownloader := downloader.NewVideoDownloader()
 	fileStorage := fileStorage.NewFileS3Storage(s3Client)
-	videoUsecase := usecases.NewVideoUsecase(videoStore, VideoDownloader, fileStorage)
+	videoUsecase := usecases.NewVideoUsecase(videoStore, VideoDownloader, fileStorage, config.S3Config.Bucket)
 	return &graph.Resolver{
 		VideoUsecase: videoUsecase,
 	}, nil

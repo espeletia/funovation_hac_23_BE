@@ -12,7 +12,7 @@ helm_resource('minio',
             '--set', 'statefulset.replicaCount=1',
             '--set', 'auth.rootUser=minio123',
             '--set', 'auth.rootPassword=minio123',
-            '--set', 'defaultBuckets=test-recycle:public test:public nats:public logs:public'
+            '--set', 'defaultBuckets=test-recycle:public test:public nats:public logs:public funovation:public',
             ]
 )
 
