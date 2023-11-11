@@ -96,7 +96,7 @@ func (vu *VideoUsecase) GetVideo(ctx context.Context, id int64) (*domain.Youtube
 
 func (vu *VideoUsecase) CreateClips(ctx context.Context, video domain.YoutubeVideo) ([]domain.Clip, error) {
 	slicedPath := strings.Split(video.S3Path, "/")
-	path := "s3://" + vu.bucket + "/video/tmp/" + slicedPath[len(slicedPath)-1]
+	path := fmt.Sprintf("s3://%s/video/temp/%s", vu.bucket, slicedPath[len(slicedPath)-1])
 	videoFile, err := vu.storage.DownloadFile(ctx, path, "")
 	if err != nil {
 		log.Println("HAIIIIII")

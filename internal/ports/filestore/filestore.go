@@ -86,7 +86,7 @@ func (fs *FileS3Storage) DownloadFile(ctx context.Context, src string, dir strin
 		return nil, err
 	}
 
-	file, err := os.CreateTemp(dir, "input.*.data")
+	file, err := os.CreateTemp(dir, "input.*.mp4")
 	if err != nil {
 		return nil, err
 	}
