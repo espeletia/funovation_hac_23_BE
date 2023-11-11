@@ -9,6 +9,7 @@ type YoutubeVideo struct {
 	Thumbnail   string
 	CustomTitle string
 	Description string
+	Clips       []Clip
 }
 
 type DownloadedYTVideo struct {
@@ -23,4 +24,18 @@ type CreateVideo struct {
 	YoutubeID   string
 	CustomTitle string
 	Description string
+}
+
+type CreateClip struct {
+	VideoID   int64
+	URL       string
+	Thumbnail string
+	Order     int64
+}
+
+type Clip struct {
+	ID        int64
+	VideoID   int64
+	URL       string
+	Thumbnail string
 }

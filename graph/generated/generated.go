@@ -50,6 +50,13 @@ type ComplexityRoot struct {
 		Ok func(childComplexity int) int
 	}
 
+	Clip struct {
+		ID        func(childComplexity int) int
+		Thumbnail func(childComplexity int) int
+		URL       func(childComplexity int) int
+		VideoID   func(childComplexity int) int
+	}
+
 	Mutation struct {
 		ProcessYoutubeVideo func(childComplexity int, req model.VideoRequest) int
 	}
@@ -60,6 +67,7 @@ type ComplexityRoot struct {
 	}
 
 	VideoResponse struct {
+		Clips       func(childComplexity int) int
 		CustomTitle func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -105,6 +113,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Ack.Ok(childComplexity), true
 
+	case "Clip.Id":
+		if e.complexity.Clip.ID == nil {
+			break
+		}
+
+		return e.complexity.Clip.ID(childComplexity), true
+
+	case "Clip.thumbnail":
+		if e.complexity.Clip.Thumbnail == nil {
+			break
+		}
+
+		return e.complexity.Clip.Thumbnail(childComplexity), true
+
+	case "Clip.url":
+		if e.complexity.Clip.URL == nil {
+			break
+		}
+
+		return e.complexity.Clip.URL(childComplexity), true
+
+	case "Clip.VideoId":
+		if e.complexity.Clip.VideoID == nil {
+			break
+		}
+
+		return e.complexity.Clip.VideoID(childComplexity), true
+
 	case "Mutation.processYoutubeVideo":
 		if e.complexity.Mutation.ProcessYoutubeVideo == nil {
 			break
@@ -135,6 +171,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVideos(childComplexity), true
+
+	case "VideoResponse.clips":
+		if e.complexity.VideoResponse.Clips == nil {
+			break
+		}
+
+		return e.complexity.VideoResponse.Clips(childComplexity), true
 
 	case "VideoResponse.customTitle":
 		if e.complexity.VideoResponse.CustomTitle == nil {
@@ -316,6 +359,14 @@ type Mutation
     thumbnail: String!
     customTitle: String!
     description: String!
+    clips: [Clip!]!
+}
+
+type Clip {
+    Id: ID!
+    VideoId: ID!
+    thumbnail: String!
+    url: String!
 }
 
 input VideoRequest {
@@ -466,6 +517,182 @@ func (ec *executionContext) fieldContext_Ack_ok(ctx context.Context, field graph
 	return fc, nil
 }
 
+func (ec *executionContext) _Clip_Id(ctx context.Context, field graphql.CollectedField, obj *model.Clip) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Clip_Id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Clip_Id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Clip",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Clip_VideoId(ctx context.Context, field graphql.CollectedField, obj *model.Clip) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Clip_VideoId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VideoID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Clip_VideoId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Clip",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Clip_thumbnail(ctx context.Context, field graphql.CollectedField, obj *model.Clip) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Clip_thumbnail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Thumbnail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Clip_thumbnail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Clip",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Clip_url(ctx context.Context, field graphql.CollectedField, obj *model.Clip) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Clip_url(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Clip_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Clip",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_processYoutubeVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_processYoutubeVideo(ctx, field)
 	if err != nil {
@@ -521,6 +748,8 @@ func (ec *executionContext) fieldContext_Mutation_processYoutubeVideo(ctx contex
 				return ec.fieldContext_VideoResponse_customTitle(ctx, field)
 			case "description":
 				return ec.fieldContext_VideoResponse_description(ctx, field)
+			case "clips":
+				return ec.fieldContext_VideoResponse_clips(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VideoResponse", field.Name)
 		},
@@ -594,6 +823,8 @@ func (ec *executionContext) fieldContext_Query_getVideo(ctx context.Context, fie
 				return ec.fieldContext_VideoResponse_customTitle(ctx, field)
 			case "description":
 				return ec.fieldContext_VideoResponse_description(ctx, field)
+			case "clips":
+				return ec.fieldContext_VideoResponse_clips(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VideoResponse", field.Name)
 		},
@@ -667,6 +898,8 @@ func (ec *executionContext) fieldContext_Query_getVideos(ctx context.Context, fi
 				return ec.fieldContext_VideoResponse_customTitle(ctx, field)
 			case "description":
 				return ec.fieldContext_VideoResponse_description(ctx, field)
+			case "clips":
+				return ec.fieldContext_VideoResponse_clips(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VideoResponse", field.Name)
 		},
@@ -1150,6 +1383,60 @@ func (ec *executionContext) fieldContext_VideoResponse_description(ctx context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VideoResponse_clips(ctx context.Context, field graphql.CollectedField, obj *model.VideoResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VideoResponse_clips(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Clips, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Clip)
+	fc.Result = res
+	return ec.marshalNClip2ᚕᚖfunovation_23ᚋgraphᚋmodelᚐClipᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VideoResponse_clips(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VideoResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "Id":
+				return ec.fieldContext_Clip_Id(ctx, field)
+			case "VideoId":
+				return ec.fieldContext_Clip_VideoId(ctx, field)
+			case "thumbnail":
+				return ec.fieldContext_Clip_thumbnail(ctx, field)
+			case "url":
+				return ec.fieldContext_Clip_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Clip", field.Name)
 		},
 	}
 	return fc, nil
@@ -3022,6 +3309,60 @@ func (ec *executionContext) _Ack(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
+var clipImplementors = []string{"Clip"}
+
+func (ec *executionContext) _Clip(ctx context.Context, sel ast.SelectionSet, obj *model.Clip) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clipImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Clip")
+		case "Id":
+			out.Values[i] = ec._Clip_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "VideoId":
+			out.Values[i] = ec._Clip_VideoId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "thumbnail":
+			out.Values[i] = ec._Clip_thumbnail(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "url":
+			out.Values[i] = ec._Clip_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3213,6 +3554,11 @@ func (ec *executionContext) _VideoResponse(ctx context.Context, sel ast.Selectio
 			}
 		case "description":
 			out.Values[i] = ec._VideoResponse_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "clips":
+			out.Values[i] = ec._VideoResponse_clips(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3578,6 +3924,60 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNClip2ᚕᚖfunovation_23ᚋgraphᚋmodelᚐClipᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Clip) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNClip2ᚖfunovation_23ᚋgraphᚋmodelᚐClip(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNClip2ᚖfunovation_23ᚋgraphᚋmodelᚐClip(ctx context.Context, sel ast.SelectionSet, v *model.Clip) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Clip(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

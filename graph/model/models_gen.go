@@ -6,6 +6,13 @@ type Ack struct {
 	Ok bool `json:"ok"`
 }
 
+type Clip struct {
+	ID        string `json:"Id"`
+	VideoID   string `json:"VideoId"`
+	Thumbnail string `json:"thumbnail"`
+	URL       string `json:"url"`
+}
+
 type VideoRequest struct {
 	URL         string `json:"url"`
 	Title       string `json:"title"`
@@ -13,12 +20,13 @@ type VideoRequest struct {
 }
 
 type VideoResponse struct {
-	ID          string `json:"id"`
-	URL         string `json:"url"`
-	Title       string `json:"title"`
-	YouTubeID   string `json:"youTubeId"`
-	Status      string `json:"status"`
-	Thumbnail   string `json:"thumbnail"`
-	CustomTitle string `json:"customTitle"`
-	Description string `json:"description"`
+	ID          string  `json:"id"`
+	URL         string  `json:"url"`
+	Title       string  `json:"title"`
+	YouTubeID   string  `json:"youTubeId"`
+	Status      string  `json:"status"`
+	Thumbnail   string  `json:"thumbnail"`
+	CustomTitle string  `json:"customTitle"`
+	Description string  `json:"description"`
+	Clips       []*Clip `json:"clips"`
 }

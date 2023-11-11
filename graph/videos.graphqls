@@ -7,6 +7,14 @@ type VideoResponse {
     thumbnail: String!
     customTitle: String!
     description: String!
+    clips: [Clip!]!
+}
+
+type Clip {
+    Id: ID!
+    VideoId: ID!
+    thumbnail: String!
+    url: String!
 }
 
 input VideoRequest {

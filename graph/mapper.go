@@ -22,7 +22,21 @@ func (m *Mapper) mapYoutubeVideoToGqlVideo(ytVideo *domain.YoutubeVideo) *model.
 		Thumbnail:   ytVideo.Thumbnail,
 		Description: ytVideo.Description,
 		CustomTitle: ytVideo.CustomTitle,
+		Clips:       m.mepClips(ytVideo.Clips),
 	}
+}
+
+func (m *Mapper) mepClips(clips []domain.Clip) []*model.Clip {
+	gqlClips := []*model.Clip{}
+	for _, clip := range clips {
+		gqlClips = append(gqlClips, &model.Clip{
+			ID:        strconv.FormatInt(clip.ID, 10),
+			VideoID:   strconv.FormatInt(clip.VideoID, 10),
+			URL:       clip.URL,
+			Thumbnail: clip.Thumbnail,
+		})
+	}
+	return gqlClips
 }
 
 func (m *Mapper) mapStatus(status int64) string {

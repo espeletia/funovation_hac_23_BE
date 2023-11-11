@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
+	"funovation_23/internal/domain"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -26,7 +26,7 @@ func (v *ImageMediaEncoder) GenerateThumbanail(ctx context.Context, srcPath, tem
 	durationCmd := exec.CommandContext(ctx, "ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", srcPath)
 	durationOutput, err := durationCmd.Output()
 	if err != nil {
-		return errors.Wrap(err, "failed to get video duration")
+		return errors.Wrap(err, "failed to get video duration for thumbnail generation")
 	}
 
 	durationStr := strings.TrimSpace(string(durationOutput))
@@ -37,6 +37,9 @@ func (v *ImageMediaEncoder) GenerateThumbanail(ctx context.Context, srcPath, tem
 	}
 
 	durationInt := int64(durationFloat)
+	if durationInt <= 0 {
+		return domain.UnableToThumbnail
+	}
 	// Generate a random timestamp using shuf
 	randomTimeCmd := exec.CommandContext(ctx, "shuf", "-i", fmt.Sprintf("1-%s", strconv.FormatInt(durationInt, 10)), "-n", "1")
 	randomTimeOutput, err := randomTimeCmd.Output()
@@ -57,7 +60,7 @@ func (v *ImageMediaEncoder) GenerateThumbanail(ctx context.Context, srcPath, tem
 		tempDir,
 	}
 
-	log.Println(command)
+	// log.Println(command)
 
 	// Execute the ffmpeg command
 	cmd := exec.CommandContext(ctx, "ffmpeg", command...)

@@ -12,5 +12,6 @@ type Error struct {
 func (e Error) Error() string { return e.Message }
 
 var (
-	VideoNotFoundErr = Error{Message: "Video was not found", Code: http.StatusNotFound}
+	VideoNotFoundErr  = Error{Message: "Video was not found", Code: http.StatusNotFound}
+	UnableToThumbnail = Error{Message: "Can't make thumbnail", Code: http.StatusNotFound}
 )

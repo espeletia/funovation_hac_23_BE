@@ -6,6 +6,7 @@ type encodingConfigRaw struct {
 	FfmpegPath     string
 	FfprobePath    string
 	GrMagicPath    string
+	MaxClipLength  int
 	AllowedClients string
 }
 
@@ -13,6 +14,7 @@ type EncodingConfig struct {
 	FfmpegPath     string
 	FfprobePath    string
 	GrMagicPath    string
+	MaxClipLength  int
 	AllowedClients []string
 }
 
