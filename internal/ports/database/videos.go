@@ -95,7 +95,7 @@ func (vs *VideosStore) GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo
 		table.Clips.AllColumns,
 	).FROM(table.Videos.INNER_JOIN(table.Clips, table.Videos.ID.EQ(table.Clips.Videoid))).
 		GROUP_BY(table.Videos.ID, table.Clips.ID).
-		ORDER_BY(table.Clips.Order.ASC())
+		ORDER_BY(table.Videos.CreatedAt.DESC()).LIMIT(9)
 
 	dest := []VideoWithClips{}
 	err := stmt.QueryContext(ctx, vs.db, &dest)
