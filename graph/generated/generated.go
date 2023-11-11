@@ -58,12 +58,19 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		GenerateReel        func(childComplexity int, req model.ReelRequest) int
 		ProcessYoutubeVideo func(childComplexity int, req model.VideoRequest) int
 	}
 
 	Query struct {
 		GetVideo  func(childComplexity int, internalID string) int
 		GetVideos func(childComplexity int) int
+	}
+
+	Reel struct {
+		ID      func(childComplexity int) int
+		URL     func(childComplexity int) int
+		VideoID func(childComplexity int) int
 	}
 
 	VideoResponse struct {
@@ -81,6 +88,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	ProcessYoutubeVideo(ctx context.Context, req model.VideoRequest) (*model.VideoResponse, error)
+	GenerateReel(ctx context.Context, req model.ReelRequest) (*model.Reel, error)
 }
 type QueryResolver interface {
 	GetVideo(ctx context.Context, internalID string) (*model.VideoResponse, error)
@@ -141,6 +149,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Clip.VideoID(childComplexity), true
 
+	case "Mutation.generateReel":
+		if e.complexity.Mutation.GenerateReel == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateReel_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateReel(childComplexity, args["req"].(model.ReelRequest)), true
+
 	case "Mutation.processYoutubeVideo":
 		if e.complexity.Mutation.ProcessYoutubeVideo == nil {
 			break
@@ -171,6 +191,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVideos(childComplexity), true
+
+	case "Reel.id":
+		if e.complexity.Reel.ID == nil {
+			break
+		}
+
+		return e.complexity.Reel.ID(childComplexity), true
+
+	case "Reel.URL":
+		if e.complexity.Reel.URL == nil {
+			break
+		}
+
+		return e.complexity.Reel.URL(childComplexity), true
+
+	case "Reel.videoId":
+		if e.complexity.Reel.VideoID == nil {
+			break
+		}
+
+		return e.complexity.Reel.VideoID(childComplexity), true
 
 	case "VideoResponse.clips":
 		if e.complexity.VideoResponse.Clips == nil {
@@ -243,6 +284,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputReelRequest,
 		ec.unmarshalInputVideoRequest,
 	)
 	first := true
@@ -369,14 +411,26 @@ type Clip {
     url: String!
 }
 
+type Reel{
+    id: ID!
+    videoId: ID!
+    URL: String!
+}
+
 input VideoRequest {
     url: String!
     title: String!
     description: String!
 }
 
+input ReelRequest {
+videoId: ID!
+    clipIds: [ID!]!
+}
+
 extend type Mutation {
     processYoutubeVideo(req: VideoRequest!): VideoResponse!
+    generateReel(req: ReelRequest!): Reel!
 }
 
 extend type Query {
@@ -389,6 +443,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_generateReel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ReelRequest
+	if tmp, ok := rawArgs["req"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
+		arg0, err = ec.unmarshalNReelRequest2funovation_23ᚋgraphᚋmodelᚐReelRequest(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["req"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_processYoutubeVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -768,6 +837,69 @@ func (ec *executionContext) fieldContext_Mutation_processYoutubeVideo(ctx contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_generateReel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateReel(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GenerateReel(rctx, fc.Args["req"].(model.ReelRequest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Reel)
+	fc.Result = res
+	return ec.marshalNReel2ᚖfunovation_23ᚋgraphᚋmodelᚐReel(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateReel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Reel_id(ctx, field)
+			case "videoId":
+				return ec.fieldContext_Reel_videoId(ctx, field)
+			case "URL":
+				return ec.fieldContext_Reel_URL(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Reel", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateReel_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getVideo(ctx, field)
 	if err != nil {
@@ -1031,6 +1163,138 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Reel_id(ctx context.Context, field graphql.CollectedField, obj *model.Reel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Reel_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Reel_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Reel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Reel_videoId(ctx context.Context, field graphql.CollectedField, obj *model.Reel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Reel_videoId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VideoID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Reel_videoId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Reel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Reel_URL(ctx context.Context, field graphql.CollectedField, obj *model.Reel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Reel_URL(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Reel_URL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Reel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3215,6 +3479,44 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputReelRequest(ctx context.Context, obj interface{}) (model.ReelRequest, error) {
+	var it model.ReelRequest
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"videoId", "clipIds"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "videoId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("videoId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.VideoID = data
+		case "clipIds":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clipIds"))
+			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClipIds = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputVideoRequest(ctx context.Context, obj interface{}) (model.VideoRequest, error) {
 	var it model.VideoRequest
 	asMap := map[string]interface{}{}
@@ -3389,6 +3691,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "generateReel":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateReel(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3483,6 +3792,55 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var reelImplementors = []string{"Reel"}
+
+func (ec *executionContext) _Reel(ctx context.Context, sel ast.SelectionSet, obj *model.Reel) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reelImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Reel")
+		case "id":
+			out.Values[i] = ec._Reel_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "videoId":
+			out.Values[i] = ec._Reel_videoId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "URL":
+			out.Values[i] = ec._Reel_URL(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3993,6 +4351,57 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNReel2funovation_23ᚋgraphᚋmodelᚐReel(ctx context.Context, sel ast.SelectionSet, v model.Reel) graphql.Marshaler {
+	return ec._Reel(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReel2ᚖfunovation_23ᚋgraphᚋmodelᚐReel(ctx context.Context, sel ast.SelectionSet, v *model.Reel) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Reel(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNReelRequest2funovation_23ᚋgraphᚋmodelᚐReelRequest(ctx context.Context, v interface{}) (model.ReelRequest, error) {
+	res, err := ec.unmarshalInputReelRequest(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

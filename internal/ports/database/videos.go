@@ -16,6 +16,7 @@ type VideoStoreInterface interface {
 	GetVideo(ctx context.Context, id int64) (*domain.YoutubeVideo, error)
 	GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo, error)
 	CreateClip(ctx context.Context, clip domain.CreateClip) (*domain.Clip, error)
+	CreateReel(ctx context.Context, reel domain.CreateReel) (*domain.Reel, error)
 }
 
 type VideosStore struct {
@@ -132,6 +133,25 @@ func (vs *VideosStore) CreateClip(ctx context.Context, clip domain.CreateClip) (
 	return mapDBClip(dest), nil
 }
 
+func (vs *VideosStore) CreateReel(ctx context.Context, reel domain.CreateReel) (*domain.Reel, error) {
+	insertModel := model.Reels{
+		Videoid: int32(reel.VideoID),
+		URL:     reel.URL,
+	}
+	stmt := table.Reels.INSERT(
+		table.Reels.AllColumns.Except(table.Reels.ID, table.Reels.CreatedAt),
+	).
+		MODEL(insertModel).
+		RETURNING(table.Reels.AllColumns)
+
+	dest := model.Reels{}
+	err := stmt.QueryContext(ctx, vs.db, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return mapDBReel(dest), nil
+}
+
 func mapDBVideo(video model.Videos) *domain.YoutubeVideo {
 	return &domain.YoutubeVideo{
 		ID:          int64(video.ID),
@@ -152,6 +172,7 @@ func mapDBClip(clip model.Clips) *domain.Clip {
 		VideoID:   int64(clip.Videoid),
 		URL:       clip.URL,
 		Thumbnail: clip.Thumbnail,
+		Order:     int64(clip.Order),
 	}
 }
 
@@ -163,4 +184,12 @@ func mapDBVideoWithClips(videos VideoWithClips) *domain.YoutubeVideo {
 	}
 	result.Clips = clips
 	return result
+}
+
+func mapDBReel(reel model.Reels) *domain.Reel {
+	return &domain.Reel{
+		ID:      int64(reel.ID),
+		VideoID: int64(reel.Videoid),
+		URL:     reel.URL,
+	}
 }

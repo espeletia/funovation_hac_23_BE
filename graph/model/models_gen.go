@@ -13,6 +13,17 @@ type Clip struct {
 	URL       string `json:"url"`
 }
 
+type Reel struct {
+	ID      string `json:"id"`
+	VideoID string `json:"videoId"`
+	URL     string `json:"URL"`
+}
+
+type ReelRequest struct {
+	VideoID string   `json:"videoId"`
+	ClipIds []string `json:"clipIds"`
+}
+
 type VideoRequest struct {
 	URL         string `json:"url"`
 	Title       string `json:"title"`

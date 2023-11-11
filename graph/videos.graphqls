@@ -17,14 +17,26 @@ type Clip {
     url: String!
 }
 
+type Reel{
+    id: ID!
+    videoId: ID!
+    URL: String!
+}
+
 input VideoRequest {
     url: String!
     title: String!
     description: String!
 }
 
+input ReelRequest {
+videoId: ID!
+    clipIds: [ID!]!
+}
+
 extend type Mutation {
     processYoutubeVideo(req: VideoRequest!): VideoResponse!
+    generateReel(req: ReelRequest!): Reel!
 }
 
 extend type Query {

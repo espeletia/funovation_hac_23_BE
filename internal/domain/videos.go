@@ -39,5 +39,17 @@ type Clip struct {
 	ID        int64
 	VideoID   int64
 	URL       string
+	Order     int64
 	Thumbnail string
+}
+
+type Reel struct {
+	ID      int64
+	URL     string
+	VideoID int64
+}
+
+type CreateReel struct {
+	VideoID int64
+	URL     string
 }

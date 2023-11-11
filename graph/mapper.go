@@ -39,6 +39,14 @@ func (m *Mapper) mapClips(clips []domain.Clip) []*model.Clip {
 	return gqlClips
 }
 
+func (m *Mapper) mapReel(reel *domain.Reel) *model.Reel {
+	return &model.Reel{
+		ID:      strconv.FormatInt(reel.ID, 10),
+		VideoID: strconv.FormatInt(reel.VideoID, 10),
+		URL:     reel.URL,
+	}
+}
+
 func (m *Mapper) mapStatus(status int64) string {
 	switch status {
 	case 0:

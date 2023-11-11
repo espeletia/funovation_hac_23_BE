@@ -11,6 +11,7 @@ import (
 	"funovation_23/internal/usecases/encoding/video"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -34,6 +35,7 @@ func NewVideoUsecase(videoStore database.VideoStoreInterface, downloader downloa
 		storage:        storage,
 		imageEncoder:   imageEncoder,
 		videoEncoder:   videoEncoder,
+		prod:           prod,
 	}
 }
 
@@ -173,4 +175,82 @@ func (vu *VideoUsecase) CreateClips(ctx context.Context, video domain.YoutubeVid
 	}
 
 	return clips, nil
+}
+
+func (vu *VideoUsecase) CreateReel(ctx context.Context, id int64, clipIDs []int64) (*domain.Reel, error) {
+	reel, videoId, err := vu.createReel(ctx, id, clipIDs)
+	if err != nil {
+		return nil, err
+	}
+	uploadPath := fmt.Sprintf("s3://%s/reel%s", vu.bucket, reel)
+	log.Println("UPLOADPATH:", uploadPath)
+	log.Print("VIDEOID:", reel)
+	uploadedReel, err := vu.storage.UploadFile(ctx, reel, uploadPath, "video/mp4")
+	if err != nil {
+		return nil, err
+	}
+	storedReel, err := vu.videoStore.CreateReel(ctx, domain.CreateReel{
+		VideoID: videoId,
+		URL:     uploadedReel,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return storedReel, nil
+}
+
+func (vu *VideoUsecase) createReel(ctx context.Context, id int64, clipIDs []int64) (string, int64, error) {
+	video, err := vu.videoStore.GetVideo(ctx, id)
+	if err != nil {
+		return "", 0, err
+	}
+
+	tmpPath := fmt.Sprintf("tmp/%d", video.ID)
+	err = os.MkdirAll(tmpPath, 0755)
+	if err != nil {
+		return "", 0, err
+	}
+	var videoClipIDs []int64
+	for _, clip := range video.Clips {
+		videoClipIDs = append(videoClipIDs, clip.ID)
+	}
+	log.Println("ORIGINALIDS:", videoClipIDs)
+	log.Println("REQUEST:", clipIDs)
+	// Check if the sets of clip IDs are equal
+	IDsMap := map[int64]domain.Clip{} // create and initialize a map of IDs from the new queue
+	for _, entry := range video.Clips {
+		IDsMap[entry.ID] = entry
+	}
+	var clips []domain.Clip // create a new queue that will be stored in the database
+	for _, entry := range clipIDs {
+		value, ok := IDsMap[entry]
+		if !ok { // verify that the new queue contains all the IDs from the current queue
+			return "", 0, fmt.Errorf("invalid clip IDs")
+		}
+		clips = append(clips, value)
+	}
+
+	// If the sets are equal, use the clips from the current queue
+
+	sort.Slice(clips, func(i, j int) bool {
+		return clips[i].Order < clips[j].Order
+	})
+	for _, clip := range clips {
+		vu.storage.DownloadFile(ctx, clip.URL, tmpPath)
+	}
+	files, err := os.ReadDir(tmpPath)
+	if err != nil {
+		return "", 0, err
+	}
+	filePaths := []string{}
+	for _, file := range files {
+		filePaths = append(filePaths, tmpPath+"/"+file.Name())
+		defer os.Remove(tmpPath + "/" + file.Name())
+	}
+	log.Println(filePaths)
+	resultFile, err := vu.videoEncoder.CreateReel(ctx, filePaths)
+	if err != nil {
+		return "", 0, err
+	}
+	return resultFile, video.ID, nil
 }

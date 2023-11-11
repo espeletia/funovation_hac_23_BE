@@ -20,6 +20,19 @@ func (r *mutationResolver) ProcessYoutubeVideo(ctx context.Context, req model.Vi
 	return r.Mapper.mapYoutubeVideoToGqlVideo(video), nil
 }
 
+// GenerateReel is the resolver for the generateReel field.
+func (r *mutationResolver) GenerateReel(ctx context.Context, req model.ReelRequest) (*model.Reel, error) {
+	videoId, clipIds, err := r.InputMapper.MapCreateReel(req)
+	if err != nil {
+		return nil, err
+	}
+	reel, err := r.VideoUsecase.CreateReel(ctx, videoId, clipIds)
+	if err != nil {
+		return nil, err
+	}
+	return r.Mapper.mapReel(reel), nil
+}
+
 // GetVideo is the resolver for the getVideo field.
 func (r *queryResolver) GetVideo(ctx context.Context, internalID string) (*model.VideoResponse, error) {
 	id, err := strconv.ParseInt(internalID, 10, 64)

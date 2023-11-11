@@ -102,3 +102,48 @@ func (v *VideoMediaEncoder) GenerateClips(ctx context.Context, videoPath string,
 
 	return outputDir, nil
 }
+
+func (v *VideoMediaEncoder) CreateReel(ctx context.Context, filePaths []string) (string, error) {
+	// Generate output file path
+	file, err := os.Create("file_list.txt")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return "", err
+	}
+	defer os.Remove(file.Name())
+	tmp, err := os.CreateTemp("", "reel*.mp4")
+	if err != nil {
+		fmt.Println("Error creating temporary file:", err)
+		return "", err
+	}
+	path := fmt.Sprintf("%s", tmp.Name())
+	log.Println(path)
+	os.Remove(tmp.Name())
+	for _, path := range filePaths {
+		_, err = file.WriteString(fmt.Sprintf("file '%s'\n", path))
+		if err != nil {
+			fmt.Println("Error writing to file:", err)
+			return "", err
+		}
+	}
+	bod, err := os.ReadFile(file.Name())
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return "", err
+	}
+	log.Println(string(bod))
+
+	// Run ffmpeg command
+	//ffmpeg -f concat -safe 0 -i input.txt -c copy output.mp4
+	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", file.Name(), "-c", "copy", path)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("Error running ffmpeg command:", err)
+		return "", err
+	}
+
+	return path, nil
+}
