@@ -29,6 +29,6 @@ spec:
         - name: S3_SECRET_ACCESS_KEY
           value: minio123
         - name: BUCKET
-          value: funovation
+          value: test
         - name: PROD_ENV
           value: "false"

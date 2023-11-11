@@ -49,7 +49,7 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(ctx context.Context, videoCreate dom
 	}
 	dowloadedVideo.IntS3Path = path
 	if vu.prod {
-		dowloadedVideo.IntS3Path = fmt.Sprintf("s3://%s/%s/video%s", vu.bucket, vu.bucket, dowloadedVideo.LocalPath)
+		dowloadedVideo.IntS3Path = strings.Replace(uploadedVideoPath, "https://funovation.fra1.digitaloceanspaces.com/", "s3://funovation/", 1)
 	}
 	imagePath := strings.Replace(dowloadedVideo.LocalPath, "video", "image", 1)
 	imagePath = strings.Replace(imagePath, ".mp4", ".jpg", 1)
