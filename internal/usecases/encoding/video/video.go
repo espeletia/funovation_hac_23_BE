@@ -51,8 +51,8 @@ func (v *VideoMediaEncoder) GenerateClips(ctx context.Context, videoPath string,
 
 	// Calculate the number of clips based on the video duration
 	numClips := int((videoDuration - 35) / 20)
-	if numClips > 12 {
-		numClips = 12
+	if numClips > 9 {
+		numClips = 9
 	}
 	if numClips < 1 {
 		return "", fmt.Errorf("video is too short to generate any clips")

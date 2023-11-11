@@ -6,6 +6,7 @@ import (
 	"funovation_23/internal/domain"
 	"funovation_23/internal/ports/database/gen/funovation/public/model"
 	"funovation_23/internal/ports/database/gen/funovation/public/table"
+	"log"
 
 	"github.com/go-jet/jet/v2/postgres"
 )
@@ -23,6 +24,15 @@ type VideosStore struct {
 
 func NewVideosStore(db *sql.DB) *VideosStore {
 	return &VideosStore{db: db}
+}
+
+type VideoWithClips struct {
+	Video model.Videos
+	Clips []clip
+}
+
+type clip struct {
+	model.Clips
 }
 
 func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.DownloadedYTVideo, videoPath, thumbnailPath string) (*domain.YoutubeVideo, error) {
@@ -56,28 +66,37 @@ func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.Downloaded
 }
 
 func (vs *VideosStore) GetVideo(ctx context.Context, id int64) (*domain.YoutubeVideo, error) {
-	stmt := table.Videos.SELECT(
+	stmt := postgres.SELECT(
 		table.Videos.AllColumns,
+		table.Clips.AllColumns,
 	).
-		WHERE(table.Videos.ID.EQ(postgres.Int(id)))
+		FROM(table.Videos.INNER_JOIN(table.Clips, table.Videos.ID.EQ(table.Clips.Videoid))).
+		WHERE(table.Videos.ID.EQ(postgres.Int(id))).
+		GROUP_BY(table.Videos.ID, table.Clips.ID).
+		ORDER_BY(table.Clips.Order.ASC())
 
-	dest := []model.Videos{}
+	dest := []VideoWithClips{}
 	err := stmt.QueryContext(ctx, vs.db, &dest)
 	if err != nil {
 		return nil, err
 	}
 	if len(dest) < 1 {
-		return nil, nil
+		return nil, domain.VideoNotFoundErr
 	}
-	return mapDBVideo(dest[0]), nil
+	mappedEntry := mapDBVideoWithClips(dest[0])
+	log.Println(mappedEntry)
+	return mappedEntry, nil
 }
 
 func (vs *VideosStore) GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo, error) {
-	stmt := table.Videos.SELECT(
+	stmt := postgres.SELECT(
 		table.Videos.AllColumns,
-	)
+		table.Clips.AllColumns,
+	).FROM(table.Videos.INNER_JOIN(table.Clips, table.Videos.ID.EQ(table.Clips.Videoid))).
+		GROUP_BY(table.Videos.ID, table.Clips.ID).
+		ORDER_BY(table.Clips.Order.ASC())
 
-	dest := []model.Videos{}
+	dest := []VideoWithClips{}
 	err := stmt.QueryContext(ctx, vs.db, &dest)
 	if err != nil {
 		return nil, err
@@ -87,7 +106,7 @@ func (vs *VideosStore) GetAllVideos(ctx context.Context) ([]*domain.YoutubeVideo
 	}
 	var result []*domain.YoutubeVideo
 	for _, video := range dest {
-		result = append(result, mapDBVideo(video))
+		result = append(result, mapDBVideoWithClips(video))
 	}
 	return result, nil
 }
@@ -134,4 +153,14 @@ func mapDBClip(clip model.Clips) *domain.Clip {
 		URL:       clip.URL,
 		Thumbnail: clip.Thumbnail,
 	}
+}
+
+func mapDBVideoWithClips(videos VideoWithClips) *domain.YoutubeVideo {
+	result := mapDBVideo(videos.Video)
+	var clips []domain.Clip
+	for _, clip := range videos.Clips {
+		clips = append(clips, *mapDBClip(clip.Clips))
+	}
+	result.Clips = clips
+	return result
 }

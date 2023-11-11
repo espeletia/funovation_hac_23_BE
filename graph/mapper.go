@@ -3,6 +3,7 @@ package graph
 import (
 	"funovation_23/graph/model"
 	"funovation_23/internal/domain"
+	"log"
 	"strconv"
 )
 
@@ -22,11 +23,11 @@ func (m *Mapper) mapYoutubeVideoToGqlVideo(ytVideo *domain.YoutubeVideo) *model.
 		Thumbnail:   ytVideo.Thumbnail,
 		Description: ytVideo.Description,
 		CustomTitle: ytVideo.CustomTitle,
-		Clips:       m.mepClips(ytVideo.Clips),
+		Clips:       m.mapClips(ytVideo.Clips),
 	}
 }
 
-func (m *Mapper) mepClips(clips []domain.Clip) []*model.Clip {
+func (m *Mapper) mapClips(clips []domain.Clip) []*model.Clip {
 	gqlClips := []*model.Clip{}
 	for _, clip := range clips {
 		gqlClips = append(gqlClips, &model.Clip{
