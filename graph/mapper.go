@@ -3,7 +3,6 @@ package graph
 import (
 	"funovation_23/graph/model"
 	"funovation_23/internal/domain"
-	"log"
 	"strconv"
 )
 
