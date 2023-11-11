@@ -3,6 +3,7 @@ package fileStorage
 import (
 	"context"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -71,29 +72,22 @@ func (fs *FileS3Storage) DownloadFile(ctx context.Context, src string, dir strin
 	ctx, span := fs.tracer.Start(ctx, "S3FileManager.DownloadFile")
 	span.SetAttributes(attribute.String("url", src))
 	defer span.End()
-	u, err := url.Parse(src)
+	response, err := http.Get(src)
 	if err != nil {
-		span.RecordError(err)
 		return nil, err
 	}
-
-	obj, err := fs.s3client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(u.Host),
-		Key:    aws.String(u.Path),
-	})
-	if err != nil {
-		span.RecordError(err)
-		return nil, err
-	}
+	defer response.Body.Close()
 
 	file, err := os.CreateTemp(dir, "input.*.mp4")
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	// defer file.Close() // #nosec G307
 	// defer obj.Body.Close()
-	_, err = io.Copy(file, obj.Body)
+	_, err = io.Copy(file, response.Body)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	return file, nil

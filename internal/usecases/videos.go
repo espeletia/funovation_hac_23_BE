@@ -48,9 +48,6 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(ctx context.Context, videoCreate dom
 		return nil, err
 	}
 	dowloadedVideo.IntS3Path = path
-	if vu.prod {
-		dowloadedVideo.IntS3Path = strings.Replace(uploadedVideoPath, "https://funovation.fra1.digitaloceanspaces.com/", "s3://funovation/", 1)
-	}
 	imagePath := strings.Replace(dowloadedVideo.LocalPath, "video", "image", 1)
 	imagePath = strings.Replace(imagePath, ".mp4", ".jpg", 1)
 	err = vu.imageEncoder.GenerateThumbanail(ctx, dowloadedVideo.LocalPath, imagePath)
@@ -100,7 +97,7 @@ func (vu *VideoUsecase) GetVideo(ctx context.Context, id int64) (*domain.Youtube
 }
 
 func (vu *VideoUsecase) CreateClips(ctx context.Context, video domain.YoutubeVideo) ([]domain.Clip, error) {
-	path := video.IntS3Path
+	path := video.S3Path
 	videoFile, err := vu.storage.DownloadFile(ctx, path, "")
 	if err != nil {
 		log.Println("HAIIIIII")
