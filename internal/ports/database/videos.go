@@ -33,6 +33,7 @@ func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.Downloaded
 		Thumbnail:   thumbnailPath,
 		CustomTitle: video.CustomTitle,
 		Description: video.Description,
+		S3IntPath:   video.IntS3Path,
 	}
 	stmt := table.Videos.INSERT(
 		table.Videos.YoutubeID,
@@ -41,6 +42,7 @@ func (vs *VideosStore) CreateVideo(ctx context.Context, video *domain.Downloaded
 		table.Videos.CustomTitle,
 		table.Videos.Thumbnail,
 		table.Videos.Description,
+		table.Videos.S3IntPath,
 	).
 		MODEL(inssertModel).
 		RETURNING(table.Videos.AllColumns)
@@ -121,6 +123,7 @@ func mapDBVideo(video model.Videos) *domain.YoutubeVideo {
 		Thumbnail:   video.Thumbnail,
 		CustomTitle: video.CustomTitle,
 		Description: video.Description,
+		IntS3Path:   video.S3IntPath,
 	}
 }
 

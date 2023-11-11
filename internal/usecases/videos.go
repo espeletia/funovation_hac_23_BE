@@ -42,6 +42,7 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(ctx context.Context, videoCreate dom
 		return nil, err
 	}
 	path := fmt.Sprintf("s3://%s/video%s", vu.bucket, dowloadedVideo.LocalPath)
+	dowloadedVideo.IntS3Path = path
 	uploadedVideoPath, err := vu.storage.UploadFile(ctx, dowloadedVideo.LocalPath, path, "video/mp4")
 	if err != nil {
 		return nil, err
@@ -95,8 +96,7 @@ func (vu *VideoUsecase) GetVideo(ctx context.Context, id int64) (*domain.Youtube
 }
 
 func (vu *VideoUsecase) CreateClips(ctx context.Context, video domain.YoutubeVideo) ([]domain.Clip, error) {
-	slicedPath := strings.Split(video.S3Path, "/")
-	path := fmt.Sprintf("s3://%s/video/temp/%s", vu.bucket, slicedPath[len(slicedPath)-1])
+	path := video.IntS3Path
 	videoFile, err := vu.storage.DownloadFile(ctx, path, "")
 	if err != nil {
 		log.Println("HAIIIIII")
@@ -123,13 +123,16 @@ func (vu *VideoUsecase) CreateClips(ctx context.Context, video domain.YoutubeVid
 		if file.IsDir() {
 			continue
 		}
-		path := "s3://" + vu.bucket + "/clips/" + file.Name()
+
+		// path := "s3://" + vu.bucket + "/clips/" + file.Name()
+		path := fmt.Sprintf("s3://%s/clips/%s", vu.bucket, file.Name())
 		uploadFile, err := vu.storage.UploadFile(ctx, "path/"+file.Name(), path, "video/mp4")
 		if err != nil {
 			return nil, err
 		}
 		imagePath := strings.Replace(file.Name(), "clip", "image", 1)
 		imagePath = strings.Replace(imagePath, ".mp4", ".jpg", 1)
+		// path := fmt.Sprintf("s3://%s/image/%s", vu.bucket)
 		err = vu.imageEncoder.GenerateThumbanail(ctx, "path/"+file.Name(), imagePath)
 		if err == domain.UnableToThumbnail {
 			clip, err := vu.videoStore.CreateClip(ctx, domain.CreateClip{

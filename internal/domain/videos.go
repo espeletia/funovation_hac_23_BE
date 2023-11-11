@@ -9,11 +9,13 @@ type YoutubeVideo struct {
 	Thumbnail   string
 	CustomTitle string
 	Description string
+	IntS3Path   string
 	Clips       []Clip
 }
 
 type DownloadedYTVideo struct {
 	YoutubeID   string
+	IntS3Path   string
 	CustomTitle string
 	Description string
 	LocalPath   string
