@@ -30,31 +30,44 @@ func PushRegistry(ctx context.Context, enviroment string, goVersion string) erro
 		return err
 	}
 	defer client.Close()
-	src := client.Host().Directory(".")
 
 	// Build the go binary
-	// buildContainer, err := BuildWithClient(ctx, client, goVersion)
-	// if err != nil {
-	// 	return err
-	// }
+	buildContainer, err := BuildWithClient(ctx, client, goVersion)
+	if err != nil {
+		return err
+	}
 
+	contents, err := buildContainer.Directory(buildDirectory).Export(ctx, "./build")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(contents)
+
+	client.Close()
+	client, err = dagger.Connect(ctx, dagger.WithLogOutput(os.Stderr))
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	src := client.Host().Directory(".")
 	// get reference to the local project
-	// buildDir := buildContainer.Directory(buildDirectory)
-	// configurationsDir := buildContainer.Directory(configurationsDirectory)
-	// migrationsDir := buildContainer.Directory(migrationsDirectory)
+	buildDir := buildContainer.Directory(buildDirectory)
+	configurationsDir := buildContainer.Directory(configurationsDirectory)
+	migrationsDir := buildContainer.Directory(migrationsDirectory)
 
 	// Deploy image definition
 	// deployImage := client.Container().
 	// 	From("alpine:latest").
-	// 	WithDirectory("/app", buildDir).
-	// 	WithDirectory("/app/configurations", configurationsDir).
-	// 	WithDirectory("/app/migrations", migrationsDir).
-	// 	WithWorkdir("/app").
-	// 	WithEntrypoint([]string{serverEntry})
 
 	deployImage := src.DockerBuild(dagger.DirectoryDockerBuildOpts{
-		Dockerfile: "./ci/Dockerfile",
-	})
+		Dockerfile: "./ci/Dockerfile_2",
+	}).
+		WithDirectory("/app", buildDir).
+		WithDirectory("/app/configurations", configurationsDir).
+		WithDirectory("/app/migrations", migrationsDir).
+		WithWorkdir("/app").
+		WithEntrypoint([]string{serverEntry})
 
 	// define ENV variables
 	password, err := requiredGetenv(registryPasswordEnv)
