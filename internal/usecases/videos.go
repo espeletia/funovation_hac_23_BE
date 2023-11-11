@@ -23,9 +23,10 @@ type VideoUsecase struct {
 	videoEncoder *video.VideoMediaEncoder
 
 	bucket string
+	prod   bool
 }
 
-func NewVideoUsecase(videoStore database.VideoStoreInterface, downloader downloader.VideoDownloaderInterface, storage fileStorage.FileStorageInterface, bucket string, imageEncoder *images.ImageMediaEncoder, videoEncoder *video.VideoMediaEncoder) *VideoUsecase {
+func NewVideoUsecase(videoStore database.VideoStoreInterface, downloader downloader.VideoDownloaderInterface, storage fileStorage.FileStorageInterface, bucket string, imageEncoder *images.ImageMediaEncoder, videoEncoder *video.VideoMediaEncoder, prod bool) *VideoUsecase {
 	return &VideoUsecase{
 		videoStore:     videoStore,
 		videoDowloader: downloader,
@@ -42,10 +43,13 @@ func (vu *VideoUsecase) ProcessYoutubeVideo(ctx context.Context, videoCreate dom
 		return nil, err
 	}
 	path := fmt.Sprintf("s3://%s/video%s", vu.bucket, dowloadedVideo.LocalPath)
-	dowloadedVideo.IntS3Path = path
 	uploadedVideoPath, err := vu.storage.UploadFile(ctx, dowloadedVideo.LocalPath, path, "video/mp4")
 	if err != nil {
 		return nil, err
+	}
+	dowloadedVideo.IntS3Path = path
+	if vu.prod {
+		dowloadedVideo.IntS3Path = fmt.Sprintf("s3://%s/%s/video%s", vu.bucket, vu.bucket, dowloadedVideo.LocalPath)
 	}
 	imagePath := strings.Replace(dowloadedVideo.LocalPath, "video", "image", 1)
 	imagePath = strings.Replace(imagePath, ".mp4", ".jpg", 1)

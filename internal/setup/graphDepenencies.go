@@ -22,7 +22,7 @@ func NewResolver(dbConn *sql.DB, config config.Config, s3Client *s3.Client) (*gr
 	imageEncoding := images.NewImageMediaEncoder(config.EncodingConfig.FfmpegPath)
 	videoEncoding := video.NewVideoMediaEncoder(config.EncodingConfig.FfmpegPath, config.EncodingConfig.FfprobePath, config.EncodingConfig.MaxClipLength)
 
-	videoUsecase := usecases.NewVideoUsecase(videoStore, VideoDownloader, fileStorage, config.S3Config.Bucket, imageEncoding, videoEncoding)
+	videoUsecase := usecases.NewVideoUsecase(videoStore, VideoDownloader, fileStorage, config.S3Config.Bucket, imageEncoding, videoEncoding, config.S3Config.Prod)
 	return &graph.Resolver{
 		VideoUsecase: videoUsecase,
 		Mapper:       graph.NewMapper(),

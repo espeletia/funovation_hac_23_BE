@@ -5,3 +5,4 @@ SecretAccessKey: minio123
 UploadsPathPrefix: uploads
 Region: eu-central-1
 Bucket: test
+prod: bool

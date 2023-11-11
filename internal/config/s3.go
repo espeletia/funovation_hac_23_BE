@@ -10,6 +10,7 @@ type S3Config struct {
 	Region            string
 	UploadsPathPrefix string
 	Bucket            string
+	Prod              bool
 }
 
 func loadS3Config() S3Config {
@@ -32,6 +33,10 @@ func loadS3Config() S3Config {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 	err = v.BindEnv("Bucket", "BUCKET")
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+	err = v.BindEnv("Prod", "PROD_ENV")
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}

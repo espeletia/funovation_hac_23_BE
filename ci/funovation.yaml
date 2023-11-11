@@ -30,3 +30,5 @@ spec:
           value: minio123
         - name: BUCKET
           value: funovation
+        - name: PROD_ENV
+          value: "false"
